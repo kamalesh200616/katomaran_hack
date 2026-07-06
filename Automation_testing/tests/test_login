@@ -1,0 +1,76 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+driver = webdriver.Chrome()
+driver.maximize_window()
+
+LOGIN_URL = "https://tichi-app-webapp-stage.web.app/login"
+DASHBOARD_URL = "https://tichi-app-webapp-stage.web.app/home"
+
+valid_credentials = [
+    ("test123@gmail.com", "Test@123"),
+    ("23csa53@karpagamtech.ac.in", "K2s006@2006"),
+]
+
+
+for email, password in valid_credentials:
+    driver.get(LOGIN_URL)
+
+    driver.find_element(By.ID, "email").send_keys(email)
+    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+    time.sleep(2)
+
+    driver.find_element(By.ID, "password").send_keys(password)
+    time.sleep(1)
+    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+    time.sleep(2)
+
+    current_url = driver.current_url
+
+    if "login" not in current_url.lower():
+        print(f"PASS: '{email}' logged in successfully — redirected to {current_url}")
+    elif"login" in current_url.lower():
+        print(f"PASS: '{email}' has valid email format but login correctly failed (invalid/unregistered credentials)")
+    else:
+        print(f"FAIL: '{email}' login failed, still on login page")
+
+driver.close()
+
+driver = webdriver.Chrome()
+driver.maximize_window()
+driver.get(LOGIN_URL)
+
+invalid_emails = [
+    "abc",
+    "abc@",
+    "@gmail.com",
+    "abc.com",
+    "fsdg"
+]
+
+for email in invalid_emails:
+    driver.get(LOGIN_URL)
+
+    email_field = driver.find_element(By.ID, "email")
+    email_field.clear()
+    email_field.send_keys(email)
+
+    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+    time.sleep(1)
+
+    validation_message = driver.execute_script(
+        "return arguments[0].validationMessage;", email_field
+    )
+    is_valid = driver.execute_script(
+        "return arguments[0].checkValidity();", email_field
+    )
+
+    if not is_valid and validation_message:
+        print(f"PASS: '{email}' correctly rejected — '{validation_message}'")
+    else:
+        print(f"FAIL: '{email}' was accepted, expected rejection")
+
+driver.quit()

@@ -1,0 +1,24 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+driver = webdriver.Chrome()
+driver.maximize_window()
+
+LOGIN_URL = "https://tichi-app-webapp-stage.web.app/login"
+
+
+def validate_url(driver, expected_url):
+    current_url = driver.current_url
+    assert current_url == expected_url, f"Expected URL '{expected_url}' but got '{current_url}'"
+    print("URL validation passed:", current_url)
+
+
+driver.get(LOGIN_URL)
+time.sleep(2)  
+
+validate_url(driver, LOGIN_URL)
+
+driver.quit()
